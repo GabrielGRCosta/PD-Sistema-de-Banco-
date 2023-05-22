@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Sistema de Banco</title>
+	<!-- Adicione os links para os arquivos CSS do Bootstrap -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+	<!-- Adicione o link para o arquivo CSS personalizado -->
+	<link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<body>
+	<header>
+		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+			<a class="navbar-brand" href="#">Sistema de Banco</a>
+		</nav>
+	</header>
+
+	<div class="container" style="margin-top:30px">
+		<div class="row">
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-body">
+						<h5 id="name" class="card-title">[Nome do Usuário]</h5>
+						<p id="email" class="card-text">E-mail: [E-mail do Usuário]</p>
+						<a href="index.html" onclick="test()"> Lista de usuarios </a>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-8">
+				<h2 id="pp">Bem-vindo, [Nome do Usuário]</h2>
+				<h4 id="ss">Saldo Atual: R$</h4>
+				<hr>
+
+				<h4>Saque</h4>
+				<form id="form-saque">
+					<div class="form-group">
+						<label for="valor-saque">Valor:</label>
+						<input type="text" class="form-control" placeholder="Digite o valor do saque" id="valor-saque" required>
+					</div>
+					<div class="form-group">
+						<label for="senha">Senha:</label>
+						<input type="text" class="form-control" placeholder="Digite sua senha" id="senha" required>
+					</div>
+					<button type="submit" class="btn btn-primary">Realizar Saque</button>
+				</form>
+
+
+				<h4>Depósito</h4>
+				<form id="form-deposito">
+					<div class="form-group">
+						<label for="valor-deposito">Valor:</label>
+						<input type="text" class="form-control" placeholder="Digite o valor de Deposito" id="valor-deposito"
+							required>
+					</div>
+					<button type="submit" class="btn btn-primary">Realizar Depósito</button>
+				</form>
+
+
+
+				<h4>Transferência</h4>
+				<form id="form-transferencia">
+					<div class="form-group">
+						<label for="valor-transferencia">Valor:</label>
+						<input type="text" class="form-control" placeholder="Digite o valor que deseja transferir"
+							id="valor-transferencia" required>
+					</div>
+					<div class="form-group">
+						<label for="ud-nome">Nome do destinatario:</label>
+						<input type="text" class="form-control" placeholder="Digite o nome do Destinario" id="ud-nome" required>
+					</div>
+					<div class="form-group">
+						<label for="ue-senha">Senha:</label>
+						<input type="text" class="form-control" placeholder="Digite sua senha" id="ue-senha" required>
+					</div>
+					<button type="submit" class="btn btn-primary">Realizar Transferência</button>
+				</form>
+
+
+			</div>
+		</div>
+
+		<div class="row mt-5">
+			<div class="col-md-12">
+				<h3>Extrato</h3>
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>Data</th>
+							<th>Descrição</th>
+							<th>Valor</th>
+						</tr>
+					</thead>
+					<tbody id="extrato"></tbody>
+				</table>
+			</div>
+		</div>
+
+
+	</div>
+
+
+
+
+
+
+	<!-- Adicione os links para os arquivos JavaScript do Bootstrap -->
+	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+	<script>
+		var operacoes =  [];
+		
+		function test() {
+			localStorage.removeItem('saldo');
+			localStorage.removeItem('extrato');
+		}
+
+		document.addEventListener('DOMContentLoaded', function () {
+
+			function exibirSaldoAtual() {
+				usersal = localStorage.getItem("salUser");
+				if (localStorage.getItem('saldo') != null) {
+					const saldo = parseFloat(localStorage.getItem('saldo'));
+					window.onload = document.getElementById('ss').innerHTML = "Saldo Atual: R$" + saldo;
+				} else {
+					const saldo = parseFloat(usersal);
+					window.onload = document.getElementById('ss').innerHTML = "Saldo Atual: R$" + saldo;
+				}
+			}
+
+			function atualizarExtrato() {
+				var extratoElement = document.getElementById('extrato');
+
+				if (extratoElement === null) {
+					console.log('Elemento do extrato não encontrado.');
+					return;
+				}
+
+				extratoElement.innerHTML = '';
+
+				// Obter as operações do localStorage
+
+				// Iterar sobre as operações e criar as linhas da tabela do extrato
+				console.log(operacoes)
+				operacoes.forEach(function (operacao) {
+					var tr = document.createElement('tr');
+
+					var dataTd = document.createElement('td');
+					dataTd.textContent = operacao.data;
+					tr.appendChild(dataTd);
+
+					var descricaoTd = document.createElement('td');
+					descricaoTd.textContent = operacao.descricao;
+					tr.appendChild(descricaoTd);
+
+					var valorTd = document.createElement('td');
+					valorTd.textContent = 'R$ ' + operacao.valor;
+					tr.appendChild(valorTd);
+
+					extratoElement.appendChild(tr);
+				});
+			}
+
+
+
+			window.onload = function () {
+				username = localStorage.getItem("nomeUser");
+				useremail = localStorage.getItem("emailUser");
+				usertel = localStorage.getItem("telUser");
+				usersal = localStorage.getItem("salUser");
+				console.log(localStorage);
+
+				document.getElementById('name').innerHTML = username;
+				document.getElementById('email').innerHTML = useremail;
+				document.getElementById('pp').innerHTML = username;
+				exibirSaldoAtual();
+				//atualizarExtrato();
+			};
+
+
+			function realizarSaque(userid, valorSaque, usersal, senhauser) {
+				var urlAPI = 'http://localhost:8080/conta/sacar/' + userid;
+				axios.patch(urlAPI, {senha: senhauser, valor: valorSaque})
+					.then(function (response) {
+						window.onload = alert("SAQUE REALIZADO COM SUCESSO");
+						if (localStorage.getItem('saldo') != null) {
+							var saldo = parseFloat(localStorage.getItem('saldo'));
+							var novoSaldo = saldo - valorSaque
+							localStorage.setItem('saldo', novoSaldo.toFixed(2));
+							window.onload = document.getElementById('ss').innerHTML = "Saldo Atual: R$" + novoSaldo;
+						} else {
+							var novoSaldo = usersal - valorSaque
+							localStorage.setItem('saldo', novoSaldo.toFixed(2));
+							window.onload = document.getElementById('ss').innerHTML = "Saldo Atual: R$" + novoSaldo;
+						}
+
+						var operacao = {
+					    data: new Date().toLocaleDateString(),
+					    descricao: 'Saque',
+					    valor: valorSaque
+					  };
+
+						operacoes.push(operacao);
+
+						
+						exibirSaldoAtual();
+						atualizarExtrato();
+					})
+					.catch(function (error) {
+						console.log('Erro ao realizar o saque:', error);
+						window.onload = alert("FALHA NO SAQUE");
+					});
+			}
+
+			// Função para realizar o depósito
+			function realizarDeposito(idUsuario, valor) {
+				//var urlAPI = 'http://localhost:8080/conta';
+				var urlAPI = 'http://localhost:8080/conta/depositar/' + idUsuario;
+				axios.patch(urlAPI, {valor: valor})
+					.then(function (response) {
+						window.onload = alert("DEPOSITO REALIZADO COM SUCESSO");
+
+						if (localStorage.getItem('saldo') != null) {
+							var saldo = parseFloat(localStorage.getItem('saldo'));
+							var novoSaldo = parseFloat(saldo) + parseFloat(valor)
+							localStorage.setItem('saldo', novoSaldo);
+							window.onload = document.getElementById('ss').innerHTML = "Saldo Atual: R$" + novoSaldo;
+						} else {
+							usersal = localStorage.getItem("salUser");
+							var novoSaldo = parseFloat(usersal) + parseFloat(valor)
+							localStorage.setItem('saldo', novoSaldo);
+							window.onload = document.getElementById('ss').innerHTML = "Saldo Atual: R$" + novoSaldo;
+						}
+
+						// Atualiza o extrato
+						var operacao = {
+				    data: new Date().toLocaleDateString(),
+				    descricao: 'Depósito',
+				    valor: valor
+				  };
+				
+				  // Adicionar a operação ao extrato
+				  operacoes.push(operacao);
+
+						exibirSaldoAtual();
+						atualizarExtrato();
+					})
+					.catch(function (error) {
+						console.log('Erro ao realizar o depósito:', error);
+					});
+			}
+
+			// Função para realizar a transferência
+			function realizarTransferencia(idOrigem, senhaOrigem, nomeUsuarioDestino, valor) {
+				var urlAPI = 'http://localhost:8080/conta/transferir/' + idOrigem;
+
+				axios.patch(urlAPI, {nome: nomeUsuarioDestino, senha: senhaOrigem, valor: valor})
+					.then(function (response) {
+						window.onload = alert("TRANSFERÊNCIA PARA " + nomeUsuarioDestino + " REALIZADA COM SUCESSO");
+
+						if (localStorage.getItem('saldo') != null) {
+							var saldo = parseFloat(localStorage.getItem('saldo'));
+							var novoSaldo = parseFloat(saldo) - parseFloat(valor)
+							localStorage.setItem('saldo', novoSaldo);
+							window.onload = document.getElementById('ss').innerHTML = "Saldo Atual: R$" + novoSaldo;
+						} else {
+							usersal = localStorage.getItem("salUser");
+							var novoSaldo = parseFloat(usersal) - parseFloat(valor)
+							localStorage.setItem('saldo', novoSaldo);
+							window.onload = document.getElementById('ss').innerHTML = "Saldo Atual: R$" + novoSaldo;
+						}
+
+						var operacaoOrigem = {
+					    data: new Date().toLocaleDateString(),
+					    descricao: 'Transferência enviada para ' + nomeUsuarioDestino,
+					    valor: valor
+					  };
+					
+					  var operacaoDestino = {
+					    data: new Date().toLocaleDateString(),
+					    descricao: 'Transferência recebida de ' + idOrigem,
+					    valor: valor
+					  };
+
+					  // Adicionar as operações ao extrato
+					 	operacoes.push(operacaoOrigem);
+					  operacoes.push(operacaoDestino);
+						localStorage.setItem('extrato', JSON.stringify(extrato));
+
+						exibirSaldoAtual();
+						atualizarExtrato();
+					})
+					.catch(function (error) {
+						console.log('ERRO AO REALIZAR TRANSFERÊNCIA:', error);
+						window.onload = alert("ERRO AO REALIZAR TRANSFERÊNCIA");
+					});
+			}
+
+
+
+			// Evento para capturar o envio do formulário de saque
+			var formSaque = document.getElementById('form-saque');
+			formSaque.addEventListener('submit', function (event) {
+				event.preventDefault();
+
+				usersal = localStorage.getItem("salUser");
+				userid = localStorage.getItem("idUser");
+				var valorSaque = document.getElementById('valor-saque').value;
+				var senhauser = document.getElementById('senha').value;
+
+				realizarSaque(userid, valorSaque, usersal, senhauser);
+			});
+
+			// Evento para capturar o envio do formulário de depósito
+			var formDeposito = document.getElementById('form-deposito');
+			formDeposito.addEventListener('submit', function (event) {
+				event.preventDefault();
+
+				userid = localStorage.getItem("idUser");
+				var valorDeposito = document.getElementById('valor-deposito').value;
+
+				realizarDeposito(userid, valorDeposito);
+			});
+
+			// Evento para capturar o envio do formulário de transferência
+			var formTransferencia = document.getElementById('form-transferencia');
+			formTransferencia.addEventListener('submit', function (event) {
+				event.preventDefault();
+
+				userid = localStorage.getItem("idUser");
+				var nomeDest = document.getElementById('ud-nome').value;
+				var valorTransferencia = document.getElementById('valor-transferencia').value;
+				var senhauser = document.getElementById('ue-senha').value;
+
+				realizarTransferencia(userid, senhauser, nomeDest, valorTransferencia);
+			});
+
+		});
+
+	</script>
+</body>
+
+</html>

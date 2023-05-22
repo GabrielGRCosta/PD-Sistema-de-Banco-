@@ -1,0 +1,49 @@
+/* Estilos para as páginas */
+.page {
+ 
+  margin-bottom: 20px;
+}
+
+#login, #signup {
+  /* Estilos da página de login e cadastro */
+}
+
+#dashboard, #transaction, #withdraw, #deposit, #statement {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f7f7f7;
+}
+
+#dashboard h2, #transaction h2, #withdraw h2, #deposit h2, #statement h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+.button-container button {
+  margin: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.button-container button:hover {
+  background-color: #0056b3;
+}
+
+#user-info {
+  margin-bottom: 20px;
+  text-align:

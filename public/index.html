@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Lista de Contas</title>
+	<!-- Adicione os links para os arquivos CSS do Bootstrap -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+	<!-- Adicione o link para o arquivo CSS personalizado -->
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	<style>
+		.rounded-circle-small {
+			width: 50px;
+			height: 50px;
+			border-radius: 50%;
+		}
+
+		.arrow-button {
+			background-color: transparent;
+			border: none;
+			padding: 0;
+			margin: 0;
+			width: 20px;
+			height: 20px;
+			cursor: pointer;
+		}
+
+		.arrow-button::after {
+			content: "→";
+			font-size: 16px;
+		}
+	</style>
+	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+	<script>
+		// Função para criar uma caixa de usuário com base nos dados
+		function criarCaixaUsuario(nome, email, telefone, saldo, id) {
+			var coluna = document.createElement('div');
+			coluna.className = 'col-md-4';
+
+			var card = document.createElement('div');
+			card.className = 'card mb-3';
+
+			var cardBody = document.createElement('div');
+			cardBody.className = 'card-body';
+
+			var titulo = document.createElement('h5');
+			titulo.className = 'card-title';
+			titulo.textContent = nome;
+			//console.log(telefone)
+
+			var emailParagrafo1 = document.createElement('p');
+			emailParagrafo1.className = 'card-text';
+			emailParagrafo1.textContent = 'E-mail: ' + email;
+
+			var emailParagrafo2 = document.createElement('p');
+			emailParagrafo2.className = 'card-text';
+			emailParagrafo2.textContent = 'Telefone: ' + telefone;
+
+			var divBotao = document.createElement('div');
+			divBotao.className = 'd-flex justify-content-end';
+
+			var botao = document.createElement('button');
+			botao.className = 'arrow-button';
+			botao.onclick = function () {
+				redirecionarDashboard(nome, email, telefone, saldo, id);
+			};
+
+			divBotao.appendChild(botao);
+			cardBody.appendChild(titulo);
+			cardBody.appendChild(emailParagrafo1);
+			cardBody.appendChild(emailParagrafo2);
+			cardBody.appendChild(divBotao);
+			card.appendChild(cardBody);
+			coluna.appendChild(card);
+
+			return coluna;
+		}
+
+		// Função para redirecionar para a página do dashboard
+		function redirecionarDashboard(nome, email, tel, saldo, id) {
+			//var url = 'dashboard.html?nome=' + encodeURIComponent(nome) + '&email=' + encodeURIComponent(email) + '&foto=' + encodeURIComponent(foto);
+			localStorage.setItem("nomeUser", nome);
+			localStorage.setItem("emailUser", email);
+			localStorage.setItem("telUser", tel);
+			localStorage.setItem("salUser", saldo);
+			localStorage.setItem("idUser", id);
+			window.location.href = 'dashboard2.html';
+		}
+
+		// Função para buscar as contas dos usuários da API e criar as caixas de usuário
+		function buscarContasUsuarios() {
+			var urlAPI = 'http://localhost:8080/conta';
+
+			axios.get(urlAPI)
+				.then(function (response) {
+					var contas = response.data;
+					//console.log(response.data);
+					var container = document.querySelector('.container');
+					var row = document.createElement('div');
+					row.className = 'row';
+
+					contas.forEach(function (conta) {
+						var nomeUsuario = conta['pessoa']['nome'];
+						var emailUsuario = conta['pessoa']['email'];
+						var telUsuario = conta['pessoa']['telefone'];
+						var saldoUsuario = conta['saldo'];
+						var idUsuario = conta['id']
+
+						var caixaUsuario = criarCaixaUsuario(nomeUsuario, emailUsuario, telUsuario, saldoUsuario, idUsuario);
+						row.appendChild(caixaUsuario);
+					});
+
+					container.appendChild(row);
+				})
+				.catch(function (error) {
+					console.log('Erro ao buscar contas dos usuários:', error);
+				});
+		}
+
+		// Chamar a função para buscar as contas dos usuários ao carregar a página
+		window.addEventListener('DOMContentLoaded', buscarContasUsuarios);
+	</script>
+</head>
+
+<body>
+	<header>
+		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+			<a class="navbar-brand" href="#">Sistema de Banco</a>
+		</nav>
+	</header>
+
+	<div style="margin-top: 30px;" class="container">
+		<h2>Lista de Contas</h2>
+		<hr>
+		<!-- Aqui é onde as caixas de usuário serão criadas dinamicamente -->
+	</div>
+
+	<!-- Adicione os links para os arquivos JavaScript do Bootstrap -->
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+
+</html>
